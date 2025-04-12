@@ -1,19 +1,82 @@
-@page
-@model RinohDevelopment.Views.Requests
-
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model List<RinohDevelopment.ViewModels.RecyclableRequestListViewModel>
 @{
-    Layout = null;
+    ViewData["Title"] = "مدیریت درخواست‌های بازیافت";
+    Layout = "_AdminLayout";
 }
 
-<!DOCTYPE html>
-
-<html>
-<head>
-    <title></title>
-</head>
-<body>
-<div>
+<div class="container mt-4">
+    <h2 class="mb-4">مدیریت درخواست‌های بازیافت</h2>
     
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info" role="alert">
+            هیچ درخواستی ثبت نشده است.
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <div class="row">
+                    <div class="col-2 fw-bold">کاربر</div>
+                    <div class="col-2 fw-bold">شماره تماس</div>
+                    <div class="col-3 fw-bold">زمان جمع‌آوری</div>
+                    <div class="col-2 fw-bold">تاریخ درخواست</div>
+                    <div class="col-1 fw-bold">وضعیت</div>
+                    <div class="col-2 fw-bold">عملیات</div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                @foreach (var request in Model)
+                {
+                    <div class="row border-bottom p-3 @GetStatusClass(request.Status)">
+                        <div class="col-2">@request.UserName</div>
+                        <div class="col-2 direction-ltr">@request.PhoneNumber</div>
+                        <div class="col-3">@request.PickupDate.ToString("yyyy/MM/dd") - @request.PickupTimeStart.ToString(@"hh\:mm") تا @request.PickupTimeEnd.ToString(@"hh\:mm")</div>
+                        <div class="col-2">@request.RequestDate.ToString("yyyy/MM/dd")</div>
+                        <div class="col-1">@GetStatusText(request.Status)</div>
+                        <div class="col-2">
+                            <a asp-action="RequestDetails" asp-route-id="@request.Id" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> جزئیات
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
 </div>
-</body>
-</html>
+
+@functions {
+    string GetStatusClass(RequestStatus status)
+    {
+        return status switch
+        {
+            RequestStatus.Pending => "bg-warning-subtle",
+            RequestStatus.Confirmed => "bg-info-subtle",
+            RequestStatus.Completed => "bg-success-subtle",
+            RequestStatus.Cancelled => "bg-secondary text-muted",
+            _ => ""
+        };
+    }
+    
+    string GetStatusText(RequestStatus status)
+    {
+        return status switch
+        {
+            RequestStatus.Pending => "در انتظار",
+            RequestStatus.Confirmed => "تایید شده",
+            RequestStatus.Completed => "انجام شده",
+            RequestStatus.Cancelled => "لغو شده",
+            _ => ""
+        };
+    }
+}
+
+<style>
+    .direction-ltr {
+        direction: ltr;
+        text-align: left;
+    }
+</style>

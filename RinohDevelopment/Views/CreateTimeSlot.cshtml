@@ -1,19 +1,67 @@
-@page
-@model RinohDevelopment.Views.CreateTimeSlot
-
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model RinohDevelopment.ViewModels.AdminTimeSlotCreateViewModel
 @{
-    Layout = null;
+    ViewData["Title"] = "افزودن زمان سرویس";
+    Layout = "_AdminLayout";
 }
 
-<!DOCTYPE html>
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">داشبورد</a></li>
+            <li class="breadcrumb-item"><a asp-action="TimeSlots">زمان‌های سرویس</a></li>
+            <li class="breadcrumb-item active" aria-current="page">افزودن زمان جدید</li>
+        </ol>
+    </nav>
 
-<html>
-<head>
-    <title></title>
-</head>
-<body>
-<div>
-    
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">افزودن زمان سرویس جدید</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="CreateTimeSlot" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Date" class="form-label">تاریخ</label>
+                        <input asp-for="Date" class="form-control" type="date" min="@ViewBag.MinDate" />
+                        <span asp-validation-for="Date" class="text-danger"></span>
+                        <small class="text-muted">تاریخ باید حداقل ۷۲ ساعت بعد از زمان فعلی باشد.</small>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label asp-for="StartTime" class="form-label">زمان شروع</label>
+                        <input asp-for="StartTime" class="form-control" type="time" />
+                        <span asp-validation-for="StartTime" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="EndTime" class="form-label">زمان پایان</label>
+                        <input asp-for="EndTime" class="form-control" type="time" />
+                        <span asp-validation-for="EndTime" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Capacity" class="form-label">ظرفیت</label>
+                        <input asp-for="Capacity" class="form-control" type="number" min="1" />
+                        <span asp-validation-for="Capacity" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mt-4">
+                    <a asp-action="TimeSlots" class="btn btn-secondary me-2">انصراف</a>
+                    <button type="submit" class="btn btn-primary">ذخیره</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
-</body>
-</html>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

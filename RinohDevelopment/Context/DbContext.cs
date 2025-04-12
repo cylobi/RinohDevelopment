@@ -1,4 +1,6 @@
-namespace RinohDevelopment.Models.DbContext;
+using RinohDevelopment.Models;
+using Microsoft.EntityFrameworkCore;
+namespace RinohDevelopment.Context;
 
 public class ApplicationDbContext : DbContext
 {
@@ -46,7 +48,7 @@ public class ApplicationDbContext : DbContext
             {
                 Id = 1,
                 PhoneNumber = "09123456789",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"), // Use proper password hashing
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
                 FirstName = "مدیر",
                 LastName = "سیستم",
                 IsAdmin = true
