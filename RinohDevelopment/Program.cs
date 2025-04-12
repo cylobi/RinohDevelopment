@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using RinohDevelopment.Context;
 using RinohDevelopment.Services;
 
@@ -5,8 +6,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
-var app = builder.Build();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -23,6 +22,8 @@ builder.Services.AddSession(options =>
 
 // Register custom services
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
