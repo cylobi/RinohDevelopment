@@ -1,0 +1,6 @@
+﻿services:
+  rinohdevelopment:
+    image: rinohdevelopment
+    build:
+      context: .
+      dockerfile: RinohDevelopment/Dockerfile

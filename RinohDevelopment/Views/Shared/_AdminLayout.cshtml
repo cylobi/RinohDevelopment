@@ -1,0 +1,97 @@
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - سامانه رینوه</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.rtl.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" asp-controller="Admin" asp-action="Index">پنل مدیریت رینوه</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarAdmin" aria-controls="navbarAdmin" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarAdmin">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "Index" ? "active" : "")" asp-controller="Admin" asp-action="Index">
+                                <i class="bi bi-speedometer2"></i> داشبورد
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "TimeSlots" ? "active" : "")" asp-controller="Admin" asp-action="TimeSlots">
+                                <i class="bi bi-calendar3"></i> زمان‌های سرویس
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "Requests" ? "active" : "")" asp-controller="Admin" asp-action="Requests">
+                                <i class="bi bi-list-check"></i> درخواست‌ها
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "Administrators" ? "active" : "")" asp-controller="Admin" asp-action="Administrators">
+                                <i class="bi bi-people"></i> مدیران
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="d-flex">
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Home" asp-action="Index">
+                                    <i class="bi bi-house"></i> صفحه اصلی
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <form class="form-inline" asp-controller="Account" asp-action="Logout" method="post">
+                                    <button type="submit" class="btn btn-link nav-link text-danger">
+                                        <i class="bi bi-box-arrow-right"></i> خروج
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2025 - سامانه رینوه - <a asp-controller="Home" asp-action="Privacy">حریم خصوصی</a>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
