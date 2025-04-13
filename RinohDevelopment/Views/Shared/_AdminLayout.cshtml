@@ -10,36 +10,36 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
-                <a class="navbar-brand" asp-controller="Admin" asp-action="Index">پنل مدیریت رینوه</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarAdmin" aria-controls="navbarAdmin" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarAdmin">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "Index" ? "active" : "")" asp-controller="Admin" asp-action="Index">
-                                <i class="bi bi-speedometer2"></i> داشبورد
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "TimeSlots" ? "active" : "")" asp-controller="Admin" asp-action="TimeSlots">
-                                <i class="bi bi-calendar3"></i> زمان‌های سرویس
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "Requests" ? "active" : "")" asp-controller="Admin" asp-action="Requests">
-                                <i class="bi bi-list-check"></i> درخواست‌ها
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "Administrators" ? "active" : "")" asp-controller="Admin" asp-action="Administrators">
-                                <i class="bi bi-people"></i> مدیران
-                            </a>
-                        </li>
-                    </ul>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" asp-controller="Admin" asp-action="Index">پنل مدیریت رینوه</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarAdmin" aria-controls="navbarAdmin" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarAdmin">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")" asp-controller="Admin" asp-action="Index">
+                            <i class="bi bi-speedometer2"></i> داشبورد
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "TimeSlots" ? "active" : "")" asp-controller="Admin" asp-action="TimeSlots">
+                            <i class="bi bi-calendar3"></i> زمان‌های سرویس
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Requests" ? "active" : "")" asp-controller="Admin" asp-action="Requests">
+                            <i class="bi bi-list-check"></i> درخواست‌ها
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Administrators" ? "active" : "")" asp-controller="Admin" asp-action="Administrators">
+                            <i class="bi bi-people"></i> مدیران
+                        </a>
+                    </li>
+                </ul>
                     <div class="d-flex">
                         <ul class="navbar-nav">
                             <li class="nav-item">
