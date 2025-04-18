@@ -1,0 +1,84 @@
+@model RinohDevelopment.ViewModels.RecyclableRequestViewModel
+@{
+ViewData["Title"] = "ثبت درخواست جمع‌آوری بازیافت";
+}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">ثبت درخواست جدید</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="RequestRecyclablePickup" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">انتخاب زمان جمع‌آوری</label>
+                        @if (Model.AvailableTimeSlots.Any())
+                        {
+                        <div class="list-group">
+                            @foreach (var slot in Model.AvailableTimeSlots)
+                            {
+                            <label class="list-group-item">
+                                <input type="radio" asp-for="TimeSlotId" value="@slot.Id" required />
+                                <span class="ms-2">
+                                            <i class="bi bi-calendar-event"></i>
+                                    @slot.DisplayText
+                                        </span>
+                            </label>
+                            }
+                        </div>
+                        }
+                        else
+                        {
+                        <div class="alert alert-warning">
+                            هیچ زمان خالی برای جمع‌آوری در ۷۲ ساعت آینده موجود نیست
+                        </div>
+                        }
+                        <span asp-validation-for="TimeSlotId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="Notes" class="form-label">توضیحات (اختیاری)</label>
+                        <textarea asp-for="Notes" class="form-control" rows="5"
+                                  placeholder="توضیحات مربوط به نوع بازیافت‌ها یا محل دقیق جمع‌آوری"></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                @if (Model.AvailableTimeSlots.Any())
+                {
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="bi bi-check-circle"></i> ثبت درخواست
+                </button>
+                }
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-right-circle"></i> بازگشت به داشبورد
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Styles {
+<style>
+    .list-group-item {
+        text-align: right;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    input[type="radio"] {
+        margin-left: 10px;
+    }
+</style>
+}

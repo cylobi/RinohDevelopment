@@ -1,0 +1,90 @@
+﻿@using Microsoft.EntityFrameworkCore.Metadata.Internal
+@using RinohDevelopment.Controllers
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>رینو - بازیافت هوشمند</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.rtl.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .landing-container {
+            text-align: center;
+            max-width: 800px;
+            padding: 2rem;
+        }
+
+        .brand-name {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .typewriter {
+            font-size: 1.8rem;
+            color: #4CAF50;
+            height: 50px;
+            margin-bottom: 2rem;
+        }
+
+        .cta-buttons {
+            margin-top: 2rem;
+        }
+
+        .cta-buttons .btn {
+            margin: 0 0.5rem;
+            font-size: 1.2rem;
+            padding: 0.5rem 2rem;
+            border-radius: 30px;
+        }
+
+        .illustration {
+            max-width: 100%;
+            margin: 1rem 0 2rem;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+<div class="landing-container">
+    <h1 class="brand-name">رینو</h1>
+    <div class="typewriter" id="typewriter"></div>
+
+    <img src="~/Hero.png" alt="بازیافت هوشمند" class="illustration" />
+
+    <div class="cta-buttons">
+        <a href="/Account/Register" class="btn btn-success">ثبت نام</a>
+        <a href="/Account/Login" class="btn btn-outline-primary">ورود</a>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const text = "بازیافتت رو طلا کن";
+        const typewriterElement = document.getElementById('typewriter');
+        let i = 0;
+
+        function typeWriter() {
+            if (i < text.length) {
+                typewriterElement.innerHTML += text.charAt(i);
+                i++;
+                setTimeout(typeWriter, 100);
+            }
+        }
+
+        typeWriter();
+    });
+</script>
+</body>
+</html>

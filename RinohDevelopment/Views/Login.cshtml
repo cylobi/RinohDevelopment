@@ -1,0 +1,31 @@
+@model RinohDevelopment.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "ورود به سیستم";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-4">
+        <h2 class="text-center mb-4">ورود به سیستم</h2>
+        
+        <form asp-action="Login" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="PhoneNumber" class="form-label"></label>
+                <input asp-for="PhoneNumber" class="form-control" placeholder="09123456789"/>
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group mb-4">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="form-control" placeholder="رمز عبور"/>
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">ورود</button>
+                <a asp-action="Register" class="btn btn-outline-secondary">ثبت نام جدید</a>
+            </div>
+        </form>
+    </div>
+</div>
