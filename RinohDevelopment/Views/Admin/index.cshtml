@@ -38,6 +38,26 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">سرویس های نظافت</h5>
+                    <p class="card-text display-4">@Model.CleaningServicesCount</p>
+                    <a asp-action="CleaningServices" class="btn btn-light">مشاهده</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">سفارش های نظافت در انتظار</h5>
+                    <p class="card-text display-4">@Model.PendingCleaningOrdersCount</p>
+                    <a asp-action="CleaningOrders" class="btn btn-light">مشاهده</a>
+                </div>
+            </div>
+        </div>
     </div>
     
     <div class="row mt-4">
@@ -56,6 +76,12 @@
                         </a>
                         <a asp-action="CreateAdmin" class="list-group-item list-group-item-action">
                             <i class="bi bi-person-plus"></i> افزودن مدیر جدید
+                        </a>
+                        <a asp-action="CleaningOrders" class="list-group-item list-group-item-action">
+                            <i class="bi bi-broom"></i> مدیریت سفارش های نظافت
+                        </a>
+                        <a asp-action="ManualCreditTransaction" class="list-group-item list-group-item-action">
+                            <i class="bi bi-cash-coin"></i> ثبت تراکنش اعتبار دستی
                         </a>
                     </div>
                 </div>

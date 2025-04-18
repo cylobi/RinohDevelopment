@@ -1,0 +1,76 @@
+@model RinohDevelopment.ViewModels.ManualCreditTransactionViewModel
+@{
+ViewData["Title"] = "ثبت تراکنش اعتبار دستی";
+Layout = "_AdminLayout";
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">داشبورد</a></li>
+            <li class="breadcrumb-item active" aria-current="page">ثبت تراکنش اعتبار دستی</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">ثبت تراکنش اعتبار دستی</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="ManualCreditTransaction" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="UserId" class="form-label">انتخاب کاربر</label>
+                        <select asp-for="UserId" class="form-select">
+                            <option value="">-- انتخاب کاربر --</option>
+                            @foreach (var user in Model.AvailableUsers)
+                            {
+                            <option value="@user.Id">@user.FullName (@user.PhoneNumber)</option>
+                            }
+                        </select>
+                        <span asp-validation-for="UserId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Type" class="form-label">نوع تراکنش</label>
+                        <select asp-for="Type" class="form-select">
+                            <option value="@TransactionType.Credit">افزایش اعتبار</option>
+                            <option value="@TransactionType.Debit">کاهش اعتبار</option>
+                        </select>
+                        <span asp-validation-for="Type" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Amount" class="form-label">مقدار (میلی گرم طلا)</label>
+                        <input asp-for="Amount" class="form-control" type="number" step="0.1" min="0.1" />
+                        <span asp-validation-for="Amount" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <label asp-for="Description" class="form-label">توضیحات</label>
+                        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mt-4">
+                    <a asp-action="Index" class="btn btn-secondary me-2">انصراف</a>
+                    <button type="submit" class="btn btn-primary">ثبت تراکنش</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,60 @@
+@model RinohDevelopment.ViewModels.CleaningServiceViewModel
+@{
+ViewData["Title"] = "افزودن سرویس نظافت";
+Layout = "_AdminLayout";
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">داشبورد</a></li>
+            <li class="breadcrumb-item"><a asp-action="CleaningServices">سرویس های نظافت</a></li>
+            <li class="breadcrumb-item active" aria-current="page">افزودن سرویس جدید</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">افزودن سرویس نظافت جدید</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="CreateCleaningService" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Name" class="form-label">نام سرویس</label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Price" class="form-label">قیمت (میلی گرم طلا)</label>
+                        <input asp-for="Price" class="form-control" type="number" step="0.1" min="0.1" />
+                        <span asp-validation-for="Price" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <label asp-for="Description" class="form-label">توضیحات</label>
+                        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mt-4">
+                    <a asp-action="CleaningServices" class="btn btn-secondary me-2">انصراف</a>
+                    <button type="submit" class="btn btn-primary">ذخیره</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<partial name="_ValidationScriptsPartial" />
+}

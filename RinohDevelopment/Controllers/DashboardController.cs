@@ -94,25 +94,32 @@ public class DashboardController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> RequestRecyclablePickup(RecyclableRequestViewModel model)
     {
+        // First, reload the available time slots to ensure they're always available in the view
+        var cutoffDate = DateTime.Now.AddHours(72);
+        var availableTimeSlots = await _context.TimeSlots
+            .Where(ts => ts.Date > cutoffDate && ts.RemainingCapacity > 0)
+            .OrderBy(ts => ts.Date)
+            .ThenBy(ts => ts.StartTime)
+            .ToListAsync();
+
+        model.AvailableTimeSlots = availableTimeSlots.Select(ts => new TimeSlotViewModel
+        {
+            Id = ts.Id,
+            Date = ts.Date,
+            StartTime = ts.StartTime,
+            EndTime = ts.EndTime,
+            RemainingCapacity = ts.RemainingCapacity
+        }).ToList();
+        
+        var errors = ModelState
+            .Where(x => x.Value.Errors.Count > 0)
+            .Select(x => new { x.Key, x.Value.Errors })
+            .ToList();
+
+        Console.WriteLine(errors);
+
         if (!ModelState.IsValid)
         {
-            // Reload available time slots
-            var cutoffDate = DateTime.Now.AddHours(72);
-            var availableTimeSlots = await _context.TimeSlots
-                .Where(ts => ts.Date > cutoffDate && ts.RemainingCapacity > 0)
-                .OrderBy(ts => ts.Date)
-                .ThenBy(ts => ts.StartTime)
-                .ToListAsync();
-
-            model.AvailableTimeSlots = availableTimeSlots.Select(ts => new TimeSlotViewModel
-            {
-                Id = ts.Id,
-                Date = ts.Date,
-                StartTime = ts.StartTime,
-                EndTime = ts.EndTime,
-                RemainingCapacity = ts.RemainingCapacity
-            }).ToList();
-
             return View(model);
         }
 
@@ -129,24 +136,6 @@ public class DashboardController : Controller
         if (timeSlot == null)
         {
             ModelState.AddModelError("TimeSlotId", "این زمان انتخاب شده در دسترس نیست یا ظرفیت آن تکمیل شده است.");
-            
-            // Reload available time slots
-            var cutoffDate = DateTime.Now.AddHours(72);
-            var availableTimeSlots = await _context.TimeSlots
-                .Where(ts => ts.Date > cutoffDate && ts.RemainingCapacity > 0)
-                .OrderBy(ts => ts.Date)
-                .ThenBy(ts => ts.StartTime)
-                .ToListAsync();
-
-            model.AvailableTimeSlots = availableTimeSlots.Select(ts => new TimeSlotViewModel
-            {
-                Id = ts.Id,
-                Date = ts.Date,
-                StartTime = ts.StartTime,
-                EndTime = ts.EndTime,
-                RemainingCapacity = ts.RemainingCapacity
-            }).ToList();
-
             return View(model);
         }
 
@@ -156,7 +145,7 @@ public class DashboardController : Controller
             UserId = user.Id,
             TimeSlotId = model.TimeSlotId,
             RequestDate = DateTime.Now,
-            Notes = model.Notes,
+            Notes = model.Notes ?? string.Empty, // Handle null Notes
             Status = RequestStatus.Pending
         };
 
@@ -278,7 +267,243 @@ public class DashboardController : Controller
 
         return View(viewModel);
     }
+    
+    [HttpGet]
+public async Task<IActionResult> CleaningServices()
+{
+    var services = await _context.CleaningServices
+        .OrderBy(s => s.Name)
+        .ToListAsync();
+        
+    var viewModel = services.Select(s => new CleaningServiceViewModel
+    {
+        Id = s.Id,
+        Name = s.Name,
+        Description = s.Description,
+        Price = s.Price
+    }).ToList();
+    
+    return View(viewModel);
 }
+
+[HttpGet]
+public async Task<IActionResult> OrderCleaningService(int id)
+{
+    var service = await _context.CleaningServices.FindAsync(id);
+    if (service == null)
+    {
+        return NotFound();
+    }
+    
+    var user = await _authService.GetCurrentUserAsync(HttpContext);
+    if (user == null)
+    {
+        return RedirectToAction("Login", "Account");
+    }
+    
+    var viewModel = new OrderCleaningServiceViewModel
+    {
+        ServiceId = service.Id,
+        ServiceName = service.Name,
+        ServicePrice = service.Price,
+        ServiceDate = DateTime.Now.AddDays(1),
+        ServiceAddress = user.Address
+    };
+    
+    return View(viewModel);
+}
+
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> OrderCleaningService(OrderCleaningServiceViewModel model)
+{
+    if (!ModelState.IsValid)
+    {
+        var service = await _context.CleaningServices.FindAsync(model.ServiceId);
+        if (service != null)
+        {
+            model.ServiceName = service.Name;
+            model.ServicePrice = service.Price;
+        }
+        
+        return View(model);
+    }
+    
+    var user = await _authService.GetCurrentUserAsync(HttpContext);
+    if (user == null)
+    {
+        return RedirectToAction("Login", "Account");
+    }
+    
+    // Check if user has enough credit
+    var credit = await _context.Credits.FirstOrDefaultAsync(c => c.UserId == user.Id);
+    if (credit == null || credit.Amount < model.ServicePrice)
+    {
+        ModelState.AddModelError(string.Empty, "اعتبار شما برای سفارش این سرویس کافی نیست.");
+        
+        var service = await _context.CleaningServices.FindAsync(model.ServiceId);
+        if (service != null)
+        {
+            model.ServiceName = service.Name;
+            model.ServicePrice = service.Price;
+        }
+        
+        return View(model);
+    }
+    
+    using var tsx = await _context.Database.BeginTransactionAsync();
+    
+    try
+    {
+        // Create new cleaning order
+        var order = new CleaningOrder
+        {
+            UserId = user.Id,
+            ServiceId = model.ServiceId,
+            OrderDate = DateTime.Now,
+            ServiceDate = model.ServiceDate,
+            ServiceAddress = model.ServiceAddress,
+            Status = OrderStatus.Pending
+        };
+        
+        _context.CleaningOrders.Add(order);
+        
+        // Deduct credit from user
+        credit.Amount -= model.ServicePrice;
+        _context.Credits.Update(credit);
+        
+        // Create credit transaction
+        var transaction = new CreditTransaction
+        {
+            CreditId = credit.Id,
+            TransactionDate = DateTime.Now,
+            Amount = model.ServicePrice,
+            Type = TransactionType.Debit,
+            Description = $"سفارش سرویس نظافت '{model.ServiceName}'"
+        };
+        
+        _context.CreditTransactions.Add(transaction);
+        
+        await _context.SaveChangesAsync();
+        await tsx.CommitAsync();
+        
+        TempData["SuccessMessage"] = "سفارش سرویس نظافت با موفقیت ثبت شد.";
+        return RedirectToAction("MyCleaningOrders");
+    }
+    catch (Exception ex)
+    {
+        await tsx.RollbackAsync();
+        ModelState.AddModelError(string.Empty, "خطا در ثبت سفارش: " + ex.Message);
+        
+        var service = await _context.CleaningServices.FindAsync(model.ServiceId);
+        if (service != null)
+        {
+            model.ServiceName = service.Name;
+            model.ServicePrice = service.Price;
+        }
+        
+        return View(model);
+    }
+}
+
+public async Task<IActionResult> MyCleaningOrders()
+{
+    var user = await _authService.GetCurrentUserAsync(HttpContext);
+    if (user == null)
+    {
+        return RedirectToAction("Login", "Account");
+    }
+    
+    var orders = await _context.CleaningOrders
+        .Include(o => o.Service)
+        .Where(o => o.UserId == user.Id)
+        .OrderByDescending(o => o.OrderDate)
+        .ToListAsync();
+        
+    var viewModel = orders.Select(o => new CleaningOrderViewModel
+    {
+        Id = o.Id,
+        ServiceId = o.ServiceId,
+        ServiceName = o.Service.Name,
+        ServicePrice = o.Service.Price,
+        ServiceDate = o.ServiceDate,
+        ServiceAddress = o.ServiceAddress,
+        Status = o.Status
+    }).ToList();
+    
+    return View(viewModel);
+}
+
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> CancelCleaningOrder(int id)
+{
+    var user = await _authService.GetCurrentUserAsync(HttpContext);
+    if (user == null)
+    {
+        return RedirectToAction("Login", "Account");
+    }
+    
+    var order = await _context.CleaningOrders
+        .Include(o => o.Service)
+        .FirstOrDefaultAsync(o => o.Id == id && o.UserId == user.Id);
+        
+    if (order == null)
+    {
+        TempData["ErrorMessage"] = "سفارش مورد نظر یافت نشد.";
+        return RedirectToAction("MyCleaningOrders");
+    }
+    
+    if (order.Status != OrderStatus.Pending)
+    {
+        TempData["ErrorMessage"] = "فقط سفارش های در انتظار تایید قابل لغو هستند.";
+        return RedirectToAction("MyCleaningOrders");
+    }
+    
+    using var transaction = await _context.Database.BeginTransactionAsync();
+    
+    try
+    {
+        // Cancel the order
+        order.Status = OrderStatus.Cancelled;
+        _context.CleaningOrders.Update(order);
+        
+        // Refund credit to user
+        var credit = await _context.Credits.FirstOrDefaultAsync(c => c.UserId == user.Id);
+        if (credit != null)
+        {
+            credit.Amount += order.Service.Price;
+            _context.Credits.Update(credit);
+            
+            // Create credit transaction
+            var creditTransaction = new CreditTransaction
+            {
+                CreditId = credit.Id,
+                TransactionDate = DateTime.Now,
+                Amount = order.Service.Price,
+                Type = TransactionType.Credit,
+                Description = $"بازگشت اعتبار از لغو سفارش سرویس نظافت '{order.Service.Name}'"
+            };
+            
+            _context.CreditTransactions.Add(creditTransaction);
+        }
+        
+        await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
+        
+        TempData["SuccessMessage"] = "سفارش با موفقیت لغو شد و اعتبار به حساب شما بازگشت.";
+        return RedirectToAction("MyCleaningOrders");
+    }
+    catch (Exception ex)
+    {
+        await transaction.RollbackAsync();
+        TempData["ErrorMessage"] = "خطا در لغو سفارش: " + ex.Message;
+        return RedirectToAction("MyCleaningOrders");
+    }
+}
+}
+
+
 
 public class CreditTransactionViewModel
 {

@@ -1,0 +1,48 @@
+@model List<RinohDevelopment.ViewModels.CleaningServiceViewModel>
+@{
+ViewData["Title"] = "سرویس های نظافت";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">سرویس های نظافت</h4>
+        </div>
+        <div class="card-body">
+            <p class="mb-4">
+                با استفاده از اعتبار خود می‌توانید سرویس‌های نظافت را سفارش دهید.
+            </p>
+
+            @if (!Model.Any())
+            {
+            <div class="alert alert-info">
+                در حال حاضر هیچ سرویس نظافتی تعریف نشده است.
+            </div>
+            }
+            else
+            {
+            <div class="row">
+                @foreach (var service in Model)
+                {
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">@service.Name</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">@service.Description</p>
+                            <h5 class="card-title text-primary mb-3">قیمت: @service.Price.ToString("N2") میلی‌گرم طلا</h5>
+                        </div>
+                        <div class="card-footer">
+                            <a asp-action="OrderCleaningService" asp-route-id="@service.Id" class="btn btn-primary w-100">
+                                <i class="bi bi-cart-plus"></i> سفارش
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+            }
+        </div>
+    </div>
+</div>

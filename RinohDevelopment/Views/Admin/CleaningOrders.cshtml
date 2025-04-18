@@ -1,0 +1,76 @@
+@model List<RinohDevelopment.ViewModels.AdminCleaningOrderViewModel>
+@{
+    ViewData["Title"] = "مدیریت سفارش های نظافت";
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">مدیریت سفارش های نظافت</h2>
+    
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info" role="alert">
+            هیچ سفارش نظافتی ثبت نشده است.
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <div class="row">
+                    <div class="col-2 fw-bold">کاربر</div>
+                    <div class="col-2 fw-bold">سرویس</div>
+                    <div class="col-2 fw-bold">تاریخ سفارش</div>
+                    <div class="col-2 fw-bold">تاریخ سرویس</div>
+                    <div class="col-2 fw-bold">وضعیت</div>
+                    <div class="col-2 fw-bold">عملیات</div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                @foreach (var order in Model)
+                {
+                    <div class="row border-bottom p-3 @GetStatusClass(order.Status)">
+                        <div class="col-2">@order.UserName</div>
+                        <div class="col-2">@order.ServiceName</div>
+                        <div class="col-2">@order.OrderDate.ToString("yyyy/MM/dd")</div>
+                        <div class="col-2">@order.ServiceDate.ToString("yyyy/MM/dd")</div>
+                        <div class="col-2">
+                            <span class="badge @GetStatusBadgeClass(order.Status)">@order.StatusDisplay</span>
+                        </div>
+                        <div class="col-2">
+                            <a asp-action="CleaningOrderDetails" asp-route-id="@order.Id" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> جزئیات
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@functions {
+    string GetStatusClass(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "bg-warning-subtle",
+            OrderStatus.Confirmed => "bg-info-subtle",
+            OrderStatus.Completed => "bg-success-subtle",
+            OrderStatus.Cancelled => "bg-secondary text-muted",
+            _ => ""
+        };
+    }
+    
+    string GetStatusBadgeClass(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "bg-warning",
+            OrderStatus.Confirmed => "bg-info",
+            OrderStatus.Completed => "bg-success",
+            OrderStatus.Cancelled => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+}

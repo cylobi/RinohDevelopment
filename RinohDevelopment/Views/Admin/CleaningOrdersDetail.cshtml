@@ -1,0 +1,162 @@
+@model RinohDevelopment.ViewModels.AdminCleaningOrderViewModel
+@{
+ViewData["Title"] = "جزئیات سفارش نظافت";
+Layout = "_AdminLayout";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>جزئیات سفارش نظافت</h2>
+        <a asp-action="CleaningOrders" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-right"></i> بازگشت به لیست
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+    <div class="alert alert-success mb-4">
+        @TempData["SuccessMessage"]
+    </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+    <div class="alert alert-danger mb-4">
+        @TempData["ErrorMessage"]
+    </div>
+    }
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">اطلاعات سفارش</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 fw-bold">شناسه سفارش:</label>
+                        <div class="col-sm-8">@Model.Id</div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 fw-bold">نام سرویس:</label>
+                        <div class="col-sm-8">@Model.ServiceName</div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 fw-bold">قیمت:</label>
+                        <div class="col-sm-8">@Model.ServicePrice.ToString("N2") میلی‌گرم طلا</div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 fw-bold">تاریخ سفارش:</label>
+                        <div class="col-sm-8">@Model.OrderDate.ToString("yyyy/MM/dd HH:mm")</div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 fw-bold">تاریخ سرویس:</label>
+                        <div class="col-sm-8">@Model.ServiceDate.ToString("yyyy/MM/dd")</div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 fw-bold">آدرس سرویس:</label>
+                        <div class="col-sm-8">@Model.ServiceAddress</div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 fw-bold">وضعیت:</label>
+                        <div class="col-sm-8">
+                            <span class="badge @GetStatusBadgeClass(Model.Status)">@Model.StatusDisplay</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">اطلاعات کاربر</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 fw-bold">نام و نام خانوادگی:</label>
+                        <div class="col-sm-8">@Model.UserName</div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 fw-bold">شماره تماس:</label>
+                        <div class="col-sm-8 direction-ltr">@Model.PhoneNumber</div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 fw-bold">آدرس:</label>
+                        <div class="col-sm-8">@(string.IsNullOrEmpty(Model.Address) ? "آدرس ثبت نشده" : Model.Address)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">عملیات</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                @if (Model.Status == OrderStatus.Pending)
+                {
+                <div class="col-auto">
+                    <form asp-action="ConfirmCleaningOrder" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn btn-primary mb-2">
+                            <i class="bi bi-check-circle"></i> تایید سفارش
+                        </button>
+                    </form>
+                </div>
+                }
+
+                @if (Model.Status == OrderStatus.Confirmed)
+                {
+                <div class="col-auto">
+                    <form asp-action="CompleteCleaningOrder" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn btn-success mb-2">
+                            <i class="bi bi-check-all"></i> ثبت انجام سرویس
+                        </button>
+                    </form>
+                </div>
+                }
+
+                @if (Model.Status == OrderStatus.Pending || Model.Status == OrderStatus.Confirmed)
+                {
+                <div class="col-auto ms-2">
+                    <form asp-action="CancelCleaningOrder" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn btn-danger mb-2"
+                                onclick="return confirm('آیا از لغو این سفارش اطمینان دارید؟');">
+                            <i class="bi bi-x-circle"></i> لغو سفارش
+                        </button>
+                    </form>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+string GetStatusBadgeClass(OrderStatus status)
+{
+return status switch
+{
+OrderStatus.Pending => "bg-warning",
+OrderStatus.Confirmed => "bg-info",
+OrderStatus.Completed => "bg-success",
+OrderStatus.Cancelled => "bg-secondary",
+_ => "bg-secondary"
+};
+}
+}
+
+<style>
+    .direction-ltr {
+        direction: ltr;
+        text-align: left;
+    }
+</style>

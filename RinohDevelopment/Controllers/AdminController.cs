@@ -33,12 +33,22 @@ public class AdminController : Controller
         // Get count of admins
         var adminsCount = await _context.Users
             .CountAsync(u => u.IsAdmin);
+        
+        // Get count of cleaning services
+        var cleaningServicesCount = await _context.CleaningServices
+            .CountAsync();
+        
+        // Get count of pending cleaning orders
+        var pendingCleaningOrdersCount = await _context.CleaningOrders
+            .CountAsync(o => o.Status == OrderStatus.Pending);
 
         var viewModel = new AdminDashboardViewModel
         {
             PendingRequestsCount = pendingRequestsCount,
             UpcomingTimeSlotsCount = upcomingTimeSlotsCount,
-            AdminsCount = adminsCount
+            AdminsCount = adminsCount,
+            CleaningServicesCount = cleaningServicesCount,
+            PendingCleaningOrdersCount = pendingCleaningOrdersCount
         };
 
         return View(viewModel);
@@ -510,5 +520,451 @@ public class AdminController : Controller
         return RedirectToAction("Administrators");
     }
     
+    #endregion
+
+    #region Cleaning Service
+
+    [HttpGet]
+    public async Task<IActionResult> CleaningServices()
+    {
+        var services = await _context.CleaningServices
+            .OrderBy(s => s.Name)
+            .ToListAsync();
+            
+        var viewModel = services.Select(s => new CleaningServiceViewModel
+        {
+            Id = s.Id,
+            Name = s.Name,
+            Description = s.Description,
+            Price = s.Price
+        }).ToList();
+        
+        return View(viewModel);
+    }
+
+    [HttpGet]
+    public IActionResult CreateCleaningService()
+    {
+        return View(new CleaningServiceViewModel());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateCleaningService(CleaningServiceViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+        
+        var service = new CleaningService
+        {
+            Name = model.Name,
+            Description = model.Description,
+            Price = model.Price
+        };
+        
+        _context.CleaningServices.Add(service);
+        await _context.SaveChangesAsync();
+        
+        TempData["SuccessMessage"] = "سرویس نظافت با موفقیت اضافه شد.";
+        return RedirectToAction("CleaningServices");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> EditCleaningService(int id)
+    {
+        var service = await _context.CleaningServices.FindAsync(id);
+        if (service == null)
+        {
+            return NotFound();
+        }
+        
+        var model = new CleaningServiceViewModel
+        {
+            Id = service.Id,
+            Name = service.Name,
+            Description = service.Description,
+            Price = service.Price
+        };
+        
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditCleaningService(CleaningServiceViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+        
+        var service = await _context.CleaningServices.FindAsync(model.Id);
+        if (service == null)
+        {
+            return NotFound();
+        }
+        
+        service.Name = model.Name;
+        service.Description = model.Description;
+        service.Price = model.Price;
+        
+        _context.CleaningServices.Update(service);
+        await _context.SaveChangesAsync();
+        
+        TempData["SuccessMessage"] = "سرویس نظافت با موفقیت ویرایش شد.";
+        return RedirectToAction("CleaningServices");
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteCleaningService(int id)
+    {
+        var service = await _context.CleaningServices
+            .FirstOrDefaultAsync(s => s.Id == id);
+
+        var orders = await _context.CleaningOrders
+            .Where(o => o.ServiceId == service.Id)
+            .ToListAsync();
+            
+        if (service == null)
+        {
+            return NotFound();
+        }
+        
+        if (orders.Count > 0)
+        {
+            TempData["ErrorMessage"] = "این سرویس دارای سفارش است و نمی توان آن را حذف کرد.";
+            return RedirectToAction("CleaningServices");
+        }
+        
+        _context.CleaningServices.Remove(service);
+        await _context.SaveChangesAsync();
+        
+        TempData["SuccessMessage"] = "سرویس نظافت با موفقیت حذف شد.";
+        return RedirectToAction("CleaningServices");
+    }
+
+    #endregion
+    
+    #region Cleaning Orders Management
+
+    public async Task<IActionResult> CleaningOrders()
+    {
+        var orders = await _context.CleaningOrders
+            .Include(o => o.User)
+            .Include(o => o.Service)
+            .OrderByDescending(o => o.OrderDate)
+            .ToListAsync();
+            
+        var viewModel = orders.Select(o => new AdminCleaningOrderViewModel
+        {
+            Id = o.Id,
+            UserName = $"{o.User.FirstName} {o.User.LastName}",
+            PhoneNumber = o.User.PhoneNumber,
+            ServiceName = o.Service.Name,
+            ServicePrice = o.Service.Price,
+            ServiceDate = o.ServiceDate,
+            ServiceAddress = o.ServiceAddress,
+            OrderDate = o.OrderDate,
+            Status = o.Status
+        }).ToList();
+        
+        return View(viewModel);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> CleaningOrderDetails(int id)
+    {
+        var order = await _context.CleaningOrders
+            .Include(o => o.User)
+            .Include(o => o.Service)
+            .FirstOrDefaultAsync(o => o.Id == id);
+            
+        if (order == null)
+        {
+            return NotFound();
+        }
+        
+        var viewModel = new AdminCleaningOrderViewModel
+        {
+            Id = order.Id,
+            UserName = $"{order.User.FirstName} {order.User.LastName}",
+            PhoneNumber = order.User.PhoneNumber,
+            Address = order.User.Address,
+            ServiceName = order.Service.Name,
+            ServicePrice = order.Service.Price,
+            ServiceDate = order.ServiceDate,
+            ServiceAddress = order.ServiceAddress,
+            OrderDate = order.OrderDate,
+            Status = order.Status
+        };
+        
+        return View(viewModel);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ConfirmCleaningOrder(int id)
+    {
+        var order = await _context.CleaningOrders.FindAsync(id);
+        if (order == null)
+        {
+            return NotFound();
+        }
+        
+        if (order.Status != OrderStatus.Pending)
+        {
+            TempData["ErrorMessage"] = "فقط درخواست های در انتظار تایید را می توان تایید کرد.";
+            return RedirectToAction("CleaningOrderDetails", new { id });
+        }
+        
+        order.Status = OrderStatus.Confirmed;
+        _context.CleaningOrders.Update(order);
+        await _context.SaveChangesAsync();
+        
+        TempData["SuccessMessage"] = "سفارش با موفقیت تایید شد.";
+        return RedirectToAction("CleaningOrderDetails", new { id });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CompleteCleaningOrder(int id)
+    {
+        var order = await _context.CleaningOrders.FindAsync(id);
+        if (order == null)
+        {
+            return NotFound();
+        }
+        
+        if (order.Status != OrderStatus.Confirmed)
+        {
+            TempData["ErrorMessage"] = "فقط سفارش های تایید شده را می توان انجام شده ثبت کرد.";
+            return RedirectToAction("CleaningOrderDetails", new { id });
+        }
+        
+        order.Status = OrderStatus.Completed;
+        _context.CleaningOrders.Update(order);
+        await _context.SaveChangesAsync();
+        
+        TempData["SuccessMessage"] = "سفارش با موفقیت انجام شده ثبت شد.";
+        return RedirectToAction("CleaningOrderDetails", new { id });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CancelCleaningOrder(int id)
+    {
+        var order = await _context.CleaningOrders
+            .Include(o => o.Service)
+            .Include(o => o.User)
+            .FirstOrDefaultAsync(o => o.Id == id);
+            
+        if (order == null)
+        {
+            return NotFound();
+        }
+        
+        if (order.Status == OrderStatus.Completed)
+        {
+            TempData["ErrorMessage"] = "امکان لغو سفارش انجام شده وجود ندارد.";
+            return RedirectToAction("CleaningOrderDetails", new { id });
+        }
+        
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        
+        try
+        {
+            // Cancel the order
+            order.Status = OrderStatus.Cancelled;
+            _context.CleaningOrders.Update(order);
+            
+            // If the order was pending or confirmed, refund the credit
+            if (order.Status == OrderStatus.Pending || order.Status == OrderStatus.Confirmed)
+            {
+                // Find user credit
+                var credit = await _context.Credits.FirstOrDefaultAsync(c => c.UserId == order.UserId);
+                if (credit != null)
+                {
+                    // Add refund
+                    credit.Amount += order.Service.Price;
+                    _context.Credits.Update(credit);
+                    
+                    // Create credit transaction for refund
+                    var creditTransaction = new CreditTransaction
+                    {
+                        CreditId = credit.Id,
+                        TransactionDate = DateTime.Now,
+                        Amount = order.Service.Price,
+                        Type = TransactionType.Credit,
+                        Description = $"بازگشت اعتبار از لغو سفارش سرویس نظافت '{order.Service.Name}'"
+                    };
+                    
+                    _context.CreditTransactions.Add(creditTransaction);
+                }
+            }
+            
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            
+            TempData["SuccessMessage"] = "سفارش با موفقیت لغو شد.";
+            return RedirectToAction("CleaningOrders");
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            TempData["ErrorMessage"] = "خطا در لغو سفارش: " + ex.Message;
+            return RedirectToAction("CleaningOrderDetails", new { id });
+        }
+    }
+
+#endregion
+
+    #region ManualCreditTransaction
+
+    [HttpGet]
+    public async Task<IActionResult> ManualCreditTransaction()
+    {
+        var users = await _context.Users
+            .Where(u => !u.IsAdmin)
+            .OrderBy(u => u.LastName)
+            .ThenBy(u => u.FirstName)
+            .ToListAsync();
+            
+        var viewModel = new ManualCreditTransactionViewModel
+        {
+            AvailableUsers = users.Select(u => new UserListItemViewModel
+            {
+                Id = u.Id,
+                PhoneNumber = u.PhoneNumber,
+                FullName = $"{u.FirstName} {u.LastName}"
+            }).ToList()
+        };
+        
+        return View(viewModel);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ManualCreditTransaction(ManualCreditTransactionViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            var users = await _context.Users
+                .Where(u => !u.IsAdmin)
+                .OrderBy(u => u.LastName)
+                .ThenBy(u => u.FirstName)
+                .ToListAsync();
+
+            model.AvailableUsers = users.Select(u => new UserListItemViewModel
+            {
+                Id = u.Id,
+                PhoneNumber = u.PhoneNumber,
+                FullName = $"{u.FirstName} {u.LastName}"
+            }).ToList();
+
+            return View(model);
+        }
+
+        var userCredit = await _context.Credits
+            .FirstOrDefaultAsync(c => c.UserId == model.UserId);
+
+        if (userCredit == null)
+        {
+            ModelState.AddModelError("UserId", "کاربر مورد نظر یافت نشد.");
+
+            var users = await _context.Users
+                .Where(u => !u.IsAdmin)
+                .OrderBy(u => u.LastName)
+                .ThenBy(u => u.FirstName)
+                .ToListAsync();
+
+            model.AvailableUsers = users.Select(u => new UserListItemViewModel
+            {
+                Id = u.Id,
+                PhoneNumber = u.PhoneNumber,
+                FullName = $"{u.FirstName} {u.LastName}"
+            }).ToList();
+
+            return View(model);
+        }
+
+        using var transaction = await _context.Database.BeginTransactionAsync();
+
+        try
+        {
+            // Update user's credit
+            if (model.Type == TransactionType.Credit)
+            {
+                userCredit.Amount += model.Amount;
+            }
+            else
+            {
+                if (userCredit.Amount < model.Amount)
+                {
+                    ModelState.AddModelError("Amount", "مقدار اعتبار کاربر کافی نیست.");
+
+                    var users = await _context.Users
+                        .Where(u => !u.IsAdmin)
+                        .OrderBy(u => u.LastName)
+                        .ThenBy(u => u.FirstName)
+                        .ToListAsync();
+
+                    model.AvailableUsers = users.Select(u => new UserListItemViewModel
+                    {
+                        Id = u.Id,
+                        PhoneNumber = u.PhoneNumber,
+                        FullName = $"{u.FirstName} {u.LastName}"
+                    }).ToList();
+
+                    return View(model);
+                }
+
+                userCredit.Amount -= model.Amount;
+            }
+
+            _context.Credits.Update(userCredit);
+
+            // Create credit transaction
+            var creditTransaction = new CreditTransaction
+            {
+                CreditId = userCredit.Id,
+                TransactionDate = DateTime.Now,
+                Amount = model.Amount,
+                Type = model.Type,
+                Description = model.Description
+            };
+
+            _context.CreditTransactions.Add(creditTransaction);
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            TempData["SuccessMessage"] = "تراکنش اعتبار با موفقیت ثبت شد.";
+            return RedirectToAction("Index");
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            ModelState.AddModelError(string.Empty, "خطا در ثبت تراکنش: " + ex.Message);
+
+            var users = await _context.Users
+                .Where(u => !u.IsAdmin)
+                .OrderBy(u => u.LastName)
+                .ThenBy(u => u.FirstName)
+                .ToListAsync();
+
+            model.AvailableUsers = users.Select(u => new UserListItemViewModel
+            {
+                Id = u.Id,
+                PhoneNumber = u.PhoneNumber,
+                FullName = $"{u.FirstName} {u.LastName}"
+            }).ToList();
+
+            return View(model);
+        }
+    }
+
     #endregion
 }
