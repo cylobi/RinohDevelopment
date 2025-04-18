@@ -9,7 +9,7 @@ ViewData["Title"] = "ثبت درخواست جمع‌آوری بازیافت";
     </div>
     <div class="card-body">
         <form asp-action="RequestRecyclablePickup" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="All" class="text-danger"></div>
 
             <div class="row mb-4">
                 <div class="col-md-6">
@@ -21,7 +21,7 @@ ViewData["Title"] = "ثبت درخواست جمع‌آوری بازیافت";
                             @foreach (var slot in Model.AvailableTimeSlots)
                             {
                             <label class="list-group-item">
-                                <input type="radio" asp-for="TimeSlotId" value="@slot.Id" required />
+                                <input type="radio" name="TimeSlotId" value="@slot.Id" @(Model.TimeSlotId == slot.Id ? "checked" : "") required />
                                 <span class="ms-2">
                                             <i class="bi bi-calendar-event"></i>
                                     @slot.DisplayText
@@ -33,7 +33,7 @@ ViewData["Title"] = "ثبت درخواست جمع‌آوری بازیافت";
                         else
                         {
                         <div class="alert alert-warning">
-                            هیچ زمان خالی برای جمع‌آوری در ۷۲ ساعت آینده موجود نیست
+                            هیچ زمان خالی برای جمع‌آوری در حال حاضر موجود نیست
                         </div>
                         }
                         <span asp-validation-for="TimeSlotId" class="text-danger"></span>
@@ -65,20 +65,19 @@ ViewData["Title"] = "ثبت درخواست جمع‌آوری بازیافت";
     </div>
 </div>
 
-@section Styles {
-<style>
-    .list-group-item {
-        text-align: right;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .list-group-item:hover {
-        background-color: #f8f9fa;
-    }
-
-    input[type="radio"] {
-        margin-left: 10px;
-    }
-</style>
+@section Scripts {
+<script>
+    $(document).ready(function () {
+        // Make sure at least one time slot is selected when form is submitted
+        $('form').on('submit', function (e) {
+            var selectedTimeSlot = $('input[name="TimeSlotId"]:checked').val();
+            if (!selectedTimeSlot) {
+                e.preventDefault();
+                alert('لطفا یک زمان جمع‌آوری انتخاب کنید');
+                return false;
+            }
+            return true;
+        });
+    });
+</script>
 }

@@ -12,6 +12,6 @@ public class RecyclableRequestViewModel
         
     [Display(Name = "توضیحات")]
     public string? Notes { get; set; } = string.Empty;
-        
-    public List<TimeSlotViewModel> AvailableTimeSlots { get; set; }
+
+    public List<TimeSlotViewModel> AvailableTimeSlots { get; set; } = new List<TimeSlotViewModel>();
 }

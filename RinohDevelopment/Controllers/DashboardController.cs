@@ -94,7 +94,14 @@ public class DashboardController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> RequestRecyclablePickup(RecyclableRequestViewModel model)
     {
-        // First, reload the available time slots to ensure they're always available in the view
+        // Get the current user
+        var user = await _authService.GetCurrentUserAsync(HttpContext);
+        if (user == null)
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        // Always load the available time slots
         var cutoffDate = DateTime.Now.AddHours(72);
         var availableTimeSlots = await _context.TimeSlots
             .Where(ts => ts.Date > cutoffDate && ts.RemainingCapacity > 0)
@@ -110,23 +117,11 @@ public class DashboardController : Controller
             EndTime = ts.EndTime,
             RemainingCapacity = ts.RemainingCapacity
         }).ToList();
-        
-        var errors = ModelState
-            .Where(x => x.Value.Errors.Count > 0)
-            .Select(x => new { x.Key, x.Value.Errors })
-            .ToList();
 
-        Console.WriteLine(errors);
-
+        // Check if the model is valid
         if (!ModelState.IsValid)
         {
             return View(model);
-        }
-
-        var user = await _authService.GetCurrentUserAsync(HttpContext);
-        if (user == null)
-        {
-            return RedirectToAction("Login", "Account");
         }
 
         // Check if the time slot exists and has capacity
@@ -145,7 +140,7 @@ public class DashboardController : Controller
             UserId = user.Id,
             TimeSlotId = model.TimeSlotId,
             RequestDate = DateTime.Now,
-            Notes = model.Notes ?? string.Empty, // Handle null Notes
+            Notes = model.Notes ?? string.Empty,
             Status = RequestStatus.Pending
         };
 
