@@ -1,0 +1,106 @@
+@model RinohDevelopment.Controllers.CreditHistoryViewModel
+@{
+    ViewData["Title"] = "تاریخچه اعتبار";
+    Layout = "_UserLayout";
+}
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div>اعتبار فعلی</div>
+    </div>
+    <div class="card-body">
+        <div class="d-flex align-items-center">
+            <div class="credit-icon me-4">
+                <i class="fa fa-coins fa-3x text-warning"></i>
+            </div>
+            <div>
+                <h3 class="mb-0 text-primary">@Model.CurrentCredit.ToString("N2")</h3>
+                <p class="text-muted">میلی‌گرم طلا</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div>تاریخچه تراکنش‌ها</div>
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.Transactions.Any())
+        {
+            <div class="text-center py-5">
+                <i class="fa fa-history fa-3x text-muted mb-3"></i>
+                <h5>هیچ تراکنشی در تاریخچه شما ثبت نشده است</h5>
+                <p class="text-muted">پس از انجام تراکنش‌ها، تاریخچه آن‌ها در این قسمت نمایش داده می‌شود.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>تاریخ</th>
+                            <th>نوع</th>
+                            <th>مقدار</th>
+                            <th>توضیحات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var transaction in Model.Transactions)
+                        {
+                            <tr>
+                                <td>@transaction.Date.ToString("yyyy/MM/dd HH:mm")</td>
+                                <td>
+                                    <span class="badge @(transaction.Type == TransactionType.Credit ? "badge-success" : "badge-danger")">
+                                        @transaction.TypeDisplay
+                                    </span>
+                                </td>
+                                <td class="@(transaction.Type == TransactionType.Credit ? "text-success" : "text-danger")">
+                                    @(transaction.Type == TransactionType.Credit ? "+" : "-")@transaction.Amount.ToString("N2") میلی‌گرم طلا
+                                </td>
+                                <td>@transaction.Description</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        راهنمای اعتبار
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="d-flex mb-3">
+                    <div class="me-3">
+                        <i class="fa fa-recycle fa-2x text-primary"></i>
+                    </div>
+                    <div>
+                        <h6>دریافت اعتبار از بازیافت</h6>
+                        <p class="small text-muted">
+                            با تحویل بازیافت‌های خود، به ازای وزن آن‌ها اعتبار دریافت می‌کنید.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex mb-3">
+                    <div class="me-3">
+                        <i class="fa fa-broom fa-2x text-primary"></i>
+                    </div>
+                    <div>
+                        <h6>استفاده از اعتبار</h6>
+                        <p class="small text-muted">
+                            می‌توانید از اعتبار خود برای سفارش سرویس‌های نظافت استفاده کنید.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

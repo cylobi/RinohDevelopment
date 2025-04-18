@@ -1,48 +1,85 @@
 @model List<RinohDevelopment.ViewModels.CleaningServiceViewModel>
 @{
 ViewData["Title"] = "سرویس های نظافت";
+Layout = "_UserLayout";
 }
 
-<div class="container mt-4">
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">سرویس های نظافت</h4>
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div>سرویس‌های نظافت</div>
+        <a asp-action="MyCleaningOrders" class="btn btn-sm btn-outline-primary">
+            <i class="fa fa-shopping-cart ml-1"></i> سفارش‌های من
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="mb-4">
+            <p>با استفاده از اعتبار خود، می‌توانید از سرویس‌های نظافت زیر استفاده کنید:</p>
         </div>
-        <div class="card-body">
-            <p class="mb-4">
-                با استفاده از اعتبار خود می‌توانید سرویس‌های نظافت را سفارش دهید.
-            </p>
 
-            @if (!Model.Any())
+        @if (!Model.Any())
+        {
+        <div class="alert alert-info">
+            <i class="fa fa-info-circle me-2"></i>
+            در حال حاضر هیچ سرویس نظافتی تعریف نشده است.
+        </div>
+        }
+        else
+        {
+        <div class="row">
+            @foreach (var service in Model)
             {
-            <div class="alert alert-info">
-                در حال حاضر هیچ سرویس نظافتی تعریف نشده است.
-            </div>
-            }
-            else
-            {
-            <div class="row">
-                @foreach (var service in Model)
-                {
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <h5 class="mb-0">@service.Name</h5>
-                        </div>
-                        <div class="card-body">
-                            <p class="card-text">@service.Description</p>
-                            <h5 class="card-title text-primary mb-3">قیمت: @service.Price.ToString("N2") میلی‌گرم طلا</h5>
-                        </div>
-                        <div class="card-footer">
-                            <a asp-action="OrderCleaningService" asp-route-id="@service.Id" class="btn btn-primary w-100">
-                                <i class="bi bi-cart-plus"></i> سفارش
-                            </a>
+            <div class="col-md-4 mb-4">
+                <div class="service-card">
+                    <div class="service-card-header">
+                        <h5 class="mb-0">@service.Name</h5>
+                    </div>
+                    <div class="service-card-body">
+                        <p>@service.Description</p>
+                        <div class="service-card-price">
+                            <i class="fa fa-coins me-1 text-warning"></i>
+                            @service.Price.ToString("N2") میلی‌گرم طلا
                         </div>
                     </div>
+                    <div class="service-card-footer">
+                        <a asp-action="OrderCleaningService" asp-route-id="@service.Id" class="btn btn-primary">
+                            <i class="fa fa-shopping-cart me-1"></i> سفارش
+                        </a>
+                    </div>
                 </div>
-                }
             </div>
             }
+        </div>
+        }
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <div>راهنمای استفاده از سرویس‌های نظافت</div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="text-center mb-3">
+                    <i class="fa fa-shopping-cart fa-2x text-primary mb-2"></i>
+                    <h6>انتخاب و سفارش</h6>
+                    <p class="small text-muted">سرویس مورد نظر خود را انتخاب کرده و سفارش دهید.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center mb-3">
+                    <i class="fa fa-calendar-alt fa-2x text-primary mb-2"></i>
+                    <h6>تعیین زمان</h6>
+                    <p class="small text-muted">زمان مناسب برای انجام خدمات را مشخص کنید.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center mb-3">
+                    <i class="fa fa-broom fa-2x text-primary mb-2"></i>
+                    <h6>دریافت خدمات</h6>
+                    <p class="small text-muted">در زمان تعیین شده، خدمات نظافت ارائه می‌شود.</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>

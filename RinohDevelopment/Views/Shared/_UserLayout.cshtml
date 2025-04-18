@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - رینو</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.rtl.min.css" />
+    <link rel="stylesheet" href="~/lib/FontAwesome/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/user.css" asp-append-version="true" />
+</head>
+<body>
+<div class="user-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3>رینو</h3>
+            <p>بازیافتت رو طلا کن</p>
+        </div>
+        <ul class="sidebar-menu">
+            <li>
+                <a asp-controller="Dashboard" asp-action="Index" class="@(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")">
+                    <i class="fa fa-home"></i> خانه
+                </a>
+            </li>
+            <li>
+                <a asp-controller="Dashboard" asp-action="RequestRecyclablePickup" class="@(ViewContext.RouteData.Values["Action"]?.ToString() == "RequestRecyclablePickup" ? "active" : "")">
+                    <i class="fa fa-recycle"></i> درخواست جمع‌آوری
+                </a>
+            </li>
+            <li>
+                <a asp-controller="Dashboard" asp-action="MyRequests" class="@(ViewContext.RouteData.Values["Action"]?.ToString() == "MyRequests" ? "active" : "")">
+                    <i class="fa fa-list"></i> درخواست‌های من
+                </a>
+            </li>
+            <li>
+                <a asp-controller="Dashboard" asp-action="CleaningServices" class="@(ViewContext.RouteData.Values["Action"]?.ToString() == "CleaningServices" ? "active" : "")">
+                    <i class="fa fa-broom"></i> سرویس‌های نظافت
+                </a>
+            </li>
+            <li>
+                <a asp-controller="Dashboard" asp-action="MyCleaningOrders" class="@(ViewContext.RouteData.Values["Action"]?.ToString() == "MyCleaningOrders" ? "active" : "")">
+                    <i class="fa fa-shopping-cart"></i> سفارش‌های من
+                </a>
+            </li>
+            <li>
+                <a asp-controller="Dashboard" asp-action="CreditHistory" class="@(ViewContext.RouteData.Values["Action"]?.ToString() == "CreditHistory" ? "active" : "")">
+                    <i class="fa fa-coins"></i> اعتبار و تراکنش‌ها
+                </a>
+            </li>
+            <li>
+                <a asp-controller="Account" asp-action="Profile" class="@(ViewContext.RouteData.Values["Action"]?.ToString() == "Profile" ? "active" : "")">
+                    <i class="fa fa-user"></i> پروفایل
+                </a>
+            </li>
+            <li>
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    <button type="submit" class="logout-btn">
+                        <i class="fa fa-sign-out-alt"></i> خروج
+                    </button>
+                </form>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <p>اعتبار: <span id="userCredit">@ViewBag.UserCredit</span> میلی‌گرم طلا</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="top-navbar">
+            <div class="menu-toggle">
+                <i class="fa fa-bars"></i>
+            </div>
+            <div class="user-info">
+                @if(ViewBag.UserName != null)
+                {
+                <span>@ViewBag.UserName</span>
+                }
+            </div>
+        </div>
+
+        <div class="content-wrapper">
+            @if (TempData["SuccessMessage"] != null)
+            {
+            <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+            <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            }
+
+            @RenderBody()
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/lib/FontAwesome/js/all.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+<script>
+    $(document).ready(function() {
+        // Toggle sidebar on mobile
+        $('.menu-toggle').click(function() {
+            $('.sidebar').toggleClass('active');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        $('.main-content').click(function() {
+            if ($('.sidebar').hasClass('active')) {
+                $('.sidebar').removeClass('active');
+            }
+        });
+    });
+</script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

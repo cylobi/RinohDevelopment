@@ -1,29 +1,33 @@
 @model RinohDevelopment.ViewModels.RecyclableRequestViewModel
 @{
 ViewData["Title"] = "ثبت درخواست جمع‌آوری بازیافت";
+Layout = "_UserLayout";
 }
 
-<div class="card shadow-sm">
-    <div class="card-header bg-primary text-white">
-        <h4 class="mb-0">ثبت درخواست جدید</h4>
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div>ثبت درخواست جمع‌آوری بازیافت</div>
+        <a asp-action="MyRequests" class="btn btn-sm btn-outline-primary">
+            <i class="fa fa-list ml-1"></i> درخواست‌های من
+        </a>
     </div>
     <div class="card-body">
         <form asp-action="RequestRecyclablePickup" method="post">
-            <div asp-validation-summary="All" class="text-danger"></div>
+            <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
 
             <div class="row mb-4">
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label class="form-label">انتخاب زمان جمع‌آوری</label>
+                        <label class="form-label mb-2">انتخاب زمان جمع‌آوری</label>
                         @if (Model.AvailableTimeSlots.Any())
                         {
                         <div class="list-group">
                             @foreach (var slot in Model.AvailableTimeSlots)
                             {
-                            <label class="list-group-item">
-                                <input type="radio" name="TimeSlotId" value="@slot.Id" @(Model.TimeSlotId == slot.Id ? "checked" : "") required />
-                                <span class="ms-2">
-                                            <i class="bi bi-calendar-event"></i>
+                            <label class="list-group-item d-flex align-items-center">
+                                <input type="radio" name="TimeSlotId" value="@slot.Id" @(Model.TimeSlotId == slot.Id ? "checked" : "") required class="me-2" />
+                                <span>
+                                            <i class="fa fa-calendar-alt me-2 text-primary"></i>
                                     @slot.DisplayText
                                         </span>
                             </label>
@@ -33,32 +37,41 @@ ViewData["Title"] = "ثبت درخواست جمع‌آوری بازیافت";
                         else
                         {
                         <div class="alert alert-warning">
-                            هیچ زمان خالی برای جمع‌آوری در حال حاضر موجود نیست
+                            <i class="fa fa-exclamation-triangle me-2"></i>
+                            هیچ زمان خالی برای جمع‌آوری در ۷۲ ساعت آینده موجود نیست
                         </div>
                         }
-                        <span asp-validation-for="TimeSlotId" class="text-danger"></span>
+                        <span asp-validation-for="TimeSlotId" class="text-danger mt-2 d-block"></span>
                     </div>
                 </div>
 
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label asp-for="Notes" class="form-label">توضیحات (اختیاری)</label>
+                        <label asp-for="Notes" class="form-label mb-2">توضیحات (اختیاری)</label>
                         <textarea asp-for="Notes" class="form-control" rows="5"
                                   placeholder="توضیحات مربوط به نوع بازیافت‌ها یا محل دقیق جمع‌آوری"></textarea>
-                        <span asp-validation-for="Notes" class="text-danger"></span>
+                        <span asp-validation-for="Notes" class="text-danger mt-2 d-block"></span>
+                        <small class="text-muted d-block mt-2">
+                            اگر نکته خاصی در مورد بازیافت‌های خود یا مکان جمع‌آوری دارید، در این قسمت بنویسید.
+                        </small>
                     </div>
                 </div>
+            </div>
+
+            <div class="alert alert-info mb-4">
+                <i class="fa fa-info-circle me-2"></i>
+                پس از ثبت درخواست، کارشناسان ما در زمان انتخاب شده برای جمع‌آوری بازیافت‌های شما مراجعه خواهند کرد.
             </div>
 
             <div class="d-grid gap-2">
                 @if (Model.AvailableTimeSlots.Any())
                 {
-                <button type="submit" class="btn btn-success btn-lg">
-                    <i class="bi bi-check-circle"></i> ثبت درخواست
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-check-circle me-2"></i> ثبت درخواست
                 </button>
                 }
                 <a asp-action="Index" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-right-circle"></i> بازگشت به داشبورد
+                    <i class="fa fa-arrow-right me-2"></i> بازگشت
                 </a>
             </div>
         </form>

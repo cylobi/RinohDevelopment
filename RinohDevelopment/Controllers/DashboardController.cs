@@ -19,6 +19,16 @@ public class DashboardController : Controller
         _context = context;
         _authService = authService;
     }
+    
+    private async Task SetUserInfoForLayout()
+    {
+        var user = await _authService.GetCurrentUserAsync(HttpContext);
+        if (user != null)
+        {
+            ViewBag.UserName = $"{user.FirstName} {user.LastName}";
+            ViewBag.UserCredit = user.Credit?.Amount.ToString("N2") ?? "0.00";
+        }
+    }
 
     public async Task<IActionResult> Index()
     {
@@ -27,6 +37,8 @@ public class DashboardController : Controller
         {
             return RedirectToAction("Login", "Account");
         }
+        
+        await SetUserInfoForLayout();
 
         // Get user credit
         var credit = await _context.Credits

@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace RinohDevelopment.Views;
 
-public class CleaningOrdersDetail : PageModel
+public class CleaningOrderDetails : PageModel
 {
     public void OnGet()
     {

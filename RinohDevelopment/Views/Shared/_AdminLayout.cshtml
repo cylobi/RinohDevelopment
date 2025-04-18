@@ -39,6 +39,21 @@
                             <i class="bi bi-people"></i> مدیران
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "CleaningServices" ? "active" : "")" asp-controller="Admin" asp-action="CleaningServices">
+                            <i class="bi bi-briefcase"></i> سرویس های نظافت
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "ManualCreditTransaction" ? "active" : "")" asp-controller="Admin" asp-action="ManualCreditTransaction">
+                            <i class="bi bi-cash-coin"></i> ثبت تراکنش اعتبار
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "CleaningOrders" ? "active" : "")" asp-controller="Admin" asp-action="CleaningOrders">
+                            <i class="bi bi-broom"></i> سفارش های نظافت
+                        </a>
+                    </li>
                 </ul>
                     <div class="d-flex">
                         <ul class="navbar-nav">
@@ -53,21 +68,6 @@
                                         <i class="bi bi-box-arrow-right"></i> خروج
                                     </button>
                                 </form>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "CleaningServices" ? "active" : "")" asp-controller="Admin" asp-action="CleaningServices">
-                                    <i class="bi bi-briefcase"></i> سرویس های نظافت
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "ManualCreditTransaction" ? "active" : "")" asp-controller="Admin" asp-action="ManualCreditTransaction">
-                                    <i class="bi bi-cash-coin"></i> ثبت تراکنش اعتبار
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "CleaningOrders" ? "active" : "")" asp-controller="Admin" asp-action="CleaningOrders">
-                                    <i class="bi bi-broom"></i> سفارش های نظافت
-                                </a>
                             </li>
                         </ul>
                     </div>
