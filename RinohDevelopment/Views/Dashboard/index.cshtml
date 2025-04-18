@@ -1,0 +1,147 @@
+﻿@model RinohDevelopment.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "داشبورد";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">خوش آمدید، @Model.UserName</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="fw-bold">اعتبار شما:</span>
+                        <span class="fs-4">@Model.Credit.ToString() <small>میلی‌گرم طلا</small></span>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a asp-action="RequestRecyclablePickup" class="btn btn-success">
+                            <i class="bi bi-plus-circle"></i> درخواست جمع‌آوری بازیافت
+                        </a>
+                        <a asp-action="MyRequests" class="btn btn-outline-primary">
+                            <i class="bi bi-list-check"></i> درخواست‌های من
+                        </a>
+                        <a asp-action="CreditHistory" class="btn btn-outline-info">
+                            <i class="bi bi-clock-history"></i> تاریخچه اعتبار
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">درخواست‌های اخیر</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (!Model.RecentRequests.Any())
+                    {
+                        <div class="p-4 text-center">
+                            <p class="text-muted">شما هنوز درخواست جمع‌آوری بازیافت ثبت نکرده‌اید.</p>
+                            <a asp-action="RequestRecyclablePickup" class="btn btn-primary">
+                                ثبت اولین درخواست
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>تاریخ درخواست</th>
+                                        <th>زمان جمع‌آوری</th>
+                                        <th>وضعیت</th>
+                                        <th class="text-center">جزئیات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var request in Model.RecentRequests)
+                                    {
+                                        <tr>
+                                            <td>@request.RequestDate.ToString("yyyy/MM/dd")</td>
+                                            <td>@request.TimeDisplay</td>
+                                            <td>
+                                                <span class="badge @GetStatusBadgeClass(request.Status)">
+                                                    @request.StatusDisplay
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <a asp-action="MyRequests" class="btn btn-sm btn-outline-secondary">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">راهنمای استفاده</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="d-flex">
+                                <div class="me-3 text-primary">
+                                    <i class="bi bi-1-circle fs-2"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold">درخواست جمع‌آوری</h6>
+                                    <p class="text-muted">از بخش "درخواست جمع‌آوری بازیافت" یک زمان مناسب برای جمع‌آوری بازیافت‌های خود انتخاب کنید.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="d-flex">
+                                <div class="me-3 text-primary">
+                                    <i class="bi bi-2-circle fs-2"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold">تحویل بازیافت</h6>
+                                    <p class="text-muted">در زمان تعیین شده، بازیافت‌های خود را به نماینده تحویل دهید.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="d-flex">
+                                <div class="me-3 text-primary">
+                                    <i class="bi bi-3-circle fs-2"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold">دریافت اعتبار</h6>
+                                    <p class="text-muted">پس از بررسی و توزین بازیافت‌ها، اعتبار متناسب به حساب شما افزوده می‌شود.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetStatusBadgeClass(RequestStatus status)
+    {
+        return status switch
+        {
+            RequestStatus.Pending => "bg-warning",
+            RequestStatus.Confirmed => "bg-info",
+            RequestStatus.Completed => "bg-success",
+            RequestStatus.Cancelled => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+}

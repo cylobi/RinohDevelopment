@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace RinohDevelopment.Views;
+namespace RinohDevelopment.Views.Dashboard;
 
-public class AdminDashboardView : PageModel
+public class index : PageModel
 {
     public void OnGet()
     {

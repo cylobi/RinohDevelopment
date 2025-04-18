@@ -11,7 +11,7 @@ public class RecyclableRequestViewModel
     public int TimeSlotId { get; set; }
         
     [Display(Name = "توضیحات")]
-    public string Notes { get; set; } = string.Empty;
+    public string? Notes { get; set; } = string.Empty;
         
     public List<TimeSlotViewModel> AvailableTimeSlots { get; set; }
 }
